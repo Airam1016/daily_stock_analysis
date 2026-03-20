@@ -1,0 +1,49 @@
+# ===================================
+# LiteLLM Router 生产环境配置 (参数优化版)
+# ===================================
+model_list:
+  # --- Gemini 3.x 系列 (强制 Temperature=1.0 以避免死循环) ---
+  - model_name: Gemini-3-Flash
+    litellm_params:
+      model: gemini/gemini-3-flash-preview
+      api_key: "os.environ/GEMINI_API_KEY_1"
+      proxy_url: "http://host.docker.internal:7897"
+      temperature: 1.0
+      rpm: 10
+
+  - model_name: Gemini-3.1-Flash-Lite
+    litellm_params:
+      model: gemini/gemini-3.1-flash-lite-preview
+      api_key: "os.environ/GEMINI_API_KEY_2"
+      proxy_url: "http://host.docker.internal:7897"
+      temperature: 1.0
+      rpm: 10
+
+  # --- Gemini 2.5 系列 (支持低温度分析) ---
+  - model_name: Gemini-2.5-Pro
+    litellm_params:
+      model: gemini/gemini-2.5-pro
+      api_key: "os.environ/GEMINI_API_KEY_1"
+      proxy_url: "http://host.docker.internal:7897"
+      rpm: 5
+
+  - model_name: Gemini-2.5-Flash
+    litellm_params:
+      model: gemini/gemini-2.5-flash
+      api_key: "os.environ/GEMINI_API_KEY_2"
+      proxy_url: "http://host.docker.internal:7897"
+      rpm: 15
+
+  # --- 联通 GLM-5 ---
+  - model_name: GLM-5-Unicom
+    litellm_params:
+      model: openai/glm-5
+      api_key: "os.environ/GLM_API_KEY"
+      api_base: "https://maas-api.ai-yuanjing.com/openapi/compatible-mode/v1"
+      proxy_url: null
+
+# Router 设置
+router_settings:
+  routing_strategy: simple-shuffle
+  num_retries: 1
+  enable_fallbacks: true
