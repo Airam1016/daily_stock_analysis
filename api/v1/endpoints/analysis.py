@@ -582,6 +582,30 @@ def get_analysis_status(task_id: str) -> TaskStatus:
     task = task_queue.get_task(task_id)
     
     if task:
+        # 已完成的任务从内存队列返回结果
+        if task.status == TaskStatusEnum.COMPLETED and task.result:
+            report_data = task.result.get("report", {})
+            report = _build_analysis_report(
+                report_data,
+                task.task_id,
+                task.stock_code,
+                task.stock_name,
+            )
+            return TaskStatus(
+                task_id=task.task_id,
+                status=task.status.value,
+                progress=task.progress,
+                result=AnalysisResultResponse(
+                    query_id=task.task_id,
+                    stock_code=task.stock_code,
+                    stock_name=task.stock_name,
+                    report=report.model_dump() if report else None,
+                    created_at=task.completed_at.isoformat() if task.completed_at else datetime.now().isoformat(),
+                ),
+                error=task.error,
+            )
+        
+        # 进行中的任务没有结果
         return TaskStatus(
             task_id=task.task_id,
             status=task.status.value,
