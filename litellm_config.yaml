@@ -1,38 +1,74 @@
-# ===================================
-# LiteLLM Router 生产环境配置 (参数优化版)
-# ===================================
 model_list:
-  # --- Gemini 3.x 系列 (强制 Temperature=1.0 以避免死循环) ---
-  - model_name: Gemini-3-Flash
+  # deepseek
+  - model_name: Deepseek-Reasoner
     litellm_params:
-      model: gemini/gemini-3-flash-preview
+      model: deepseek/deepseek-reasoner
+      api_key: "os.environ/DEEPSEEK_API_KEY"
+      api_base: "https://api.deepseek.com/v1"
+      proxy_url: null
+      temperature: 1
+
+  # --- Gemini 3.1 Flash Lite (15 RPM / 250K TPM / 500 RPD) ---
+  - model_name: G3.1-Flash-Lite-K1
+    litellm_params:
+      model: gemini/gemini-3.1-flash-lite-preview
       api_key: "os.environ/GEMINI_API_KEY_1"
       proxy_url: "http://host.docker.internal:7897"
-      temperature: 1.0
-      rpm: 5
+      temperature: 0.7 # 模型温度
+      rpm: 15 # 每分钟15个请求
+      tpm: 250000 # 每分钟25万个令牌
+      rpd: 500 # 每天500个请求
 
-  - model_name: Gemini-3.1-Flash-Lite
+  - model_name: G3.1-Flash-Lite-K2
     litellm_params:
       model: gemini/gemini-3.1-flash-lite-preview
       api_key: "os.environ/GEMINI_API_KEY_2"
       proxy_url: "http://host.docker.internal:7897"
-      temperature: 1.0
-      rpm: 5
+      temperature: 0.7
+      rpm: 15
+      tpm: 250000
+      rpd: 500
 
-  # --- Gemini 2.5 系列 (支持低温度分析) ---
-  - model_name: Gemini-2.5-Pro
+  - model_name: G3.1-Flash-Lite-K3
     litellm_params:
-      model: gemini/gemini-2.5-pro
+      model: gemini/gemini-3.1-flash-lite-preview
+      api_key: "os.environ/GEMINI_API_KEY_3"
+      proxy_url: "http://host.docker.internal:7897"
+      temperature: 0.7
+      rpm: 15
+      tpm: 250000
+      rpd: 500
+
+  # --- Gemini 3 Flash (5 RPM / 250K TPM / 20 RPD) ---
+  - model_name: G3-Flash-K1
+    litellm_params:
+      model: gemini/gemini-3-flash-preview
       api_key: "os.environ/GEMINI_API_KEY_1"
       proxy_url: "http://host.docker.internal:7897"
+      temperature: 0.7
       rpm: 5
+      tpm: 250000
+      rpd: 20
 
-  - model_name: Gemini-2.5-Flash
+  - model_name: G3-Flash-K2
     litellm_params:
-      model: gemini/gemini-2.5-flash
+      model: gemini/gemini-3-flash-preview
       api_key: "os.environ/GEMINI_API_KEY_2"
       proxy_url: "http://host.docker.internal:7897"
-      rpm: 15
+      temperature: 0.7
+      rpm: 5
+      tpm: 250000
+      rpd: 20
+
+  - model_name: G3-Flash-K3
+    litellm_params:
+      model: gemini/gemini-3-flash-preview
+      api_key: "os.environ/GEMINI_API_KEY_3"
+      proxy_url: "http://host.docker.internal:7897"
+      temperature: 0.7
+      rpm: 5
+      tpm: 250000
+      rpd: 20
 
   # --- 联通 GLM-5 ---
   - model_name: GLM-5-Unicom
@@ -44,6 +80,6 @@ model_list:
 
 # Router 设置
 router_settings:
-  routing_strategy: simple-shuffle
-  num_retries: 1
+  routing_strategy: "simple-shuffle"
+  num_retries: 2
   enable_fallbacks: true
